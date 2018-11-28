@@ -35,22 +35,24 @@ class ExpresionesInterpreter {
         is AnyMemberExpression -> {
             val left = evaluate(expression.left, symbolTable)
             when (left) {
-                is Iterable<*> -> {
+                is List<*> -> {
                     left.map {
                         if (it is Map<*, *>) {
                             evaluate(expression.right, it)
                         } else {
                             evaluate(expression.right, symbolTable)
                         }
-                    }.toList()
+                    }.flattenAny()
                 }
-                is Array<*> -> left.map {
-                    if (it is Map<*, *>) {
-                        evaluate(expression.right, it)
-                    } else {
-                        evaluate(expression.right, symbolTable)
-                    }
-                }.toList()
+                is Array<*> -> {
+                    left.map {
+                        if (it is Map<*, *>) {
+                            evaluate(expression.right, it)
+                        } else {
+                            evaluate(expression.right, symbolTable)
+                        }
+                    }.flattenAny()
+                }
                 else -> throw UnsupportedOperationException(expression.left.toString() + " from evaluating " + expression.right)
             }
         }
@@ -65,7 +67,7 @@ class ExpresionesInterpreter {
         is IndexExpression -> {
             val index = evaluate(expression.right, symbolTable)
             val indexValue = (index as? Long)?.toInt() ?: (index as? Int
-                ?: throw UnsupportedOperationException("Cannot use array index " + expression.right.toString() + " when evaluating " + expression.left))
+                    ?: throw UnsupportedOperationException("Cannot use array index " + expression.right.toString() + " when evaluating " + expression.left))
             val value = evaluate(expression.left, symbolTable)
             if (value is Array<*>) {
                 value[indexValue]
@@ -135,7 +137,7 @@ class ExpresionesInterpreter {
     }
 
     private fun greaterThanExpression(l: Any?, r: Any?): Boolean {
-        if(l is Comparable<*> && r is Comparable<*>) {
+        if (l is Comparable<*> && r is Comparable<*>) {
             @Suppress("UNCHECKED_CAST")
             return l as Comparable<Any?> > r as Comparable<Any?>
         } else {
@@ -144,7 +146,7 @@ class ExpresionesInterpreter {
     }
 
     private fun lessThanExpression(l: Any?, r: Any?): Boolean {
-        if(l is Comparable<*> && r is Comparable<*>) {
+        if (l is Comparable<*> && r is Comparable<*>) {
             @Suppress("UNCHECKED_CAST")
             return l as Comparable<Any?> < r as Comparable<Any?>
         } else {
@@ -153,7 +155,7 @@ class ExpresionesInterpreter {
     }
 
     private fun equalsExpression(
-        l: Any?, r: Any?, left: Expression
+            l: Any?, r: Any?, left: Expression
     ): Boolean {
         return when {
             l is String && r is String -> l == r
@@ -213,7 +215,23 @@ class ExpresionesInterpreter {
         return almostEqual(a.toDouble(), b)
     }
 
+    private fun List<Any?>.flattenAny(): List<Any?> {
+        val list = mutableListOf<Any?>()
+        flattenList(this, list)
+        return list.toList()
+    }
+
+    private fun flattenList(nestedList: List<Any?>, flatList: MutableList<Any?>) {
+        nestedList.forEach { e ->
+            when (e) {
+                !is List<Any?> -> flatList.add(e)
+                else -> flattenList(e, flatList)
+            }
+        }
+    }
+
 }
+
 
 
 fun main(args: Array<String>) {
@@ -221,10 +239,10 @@ fun main(args: Array<String>) {
     val expression = ExpresionesAntlrParserFacade.parse(code).root!!.toAst(considerPosition = true).expression
 
     val variables = mapOf(
-        "a" to arrayOf(mapOf("names" to mapOf("first" to "pelle")), mapOf("names" to mapOf("first" to "kalle"))),
-        "b" to true,
-        "c" to 3,
-        "foo" to mapOf("name" to mapOf("first" to "pelle"))
+            "a" to arrayOf(mapOf("names" to mapOf("first" to "pelle")), mapOf("names" to mapOf("first" to "kalle"))),
+            "b" to true,
+            "c" to 3,
+            "foo" to mapOf("name" to mapOf("first" to "pelle"))
     )
     val interpreter = ExpresionesInterpreter()
 

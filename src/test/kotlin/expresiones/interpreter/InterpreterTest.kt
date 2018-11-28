@@ -194,9 +194,26 @@ class InterpreterTest {
     @Test
     fun `expression to test if array contains value finds existing value`() {
         assertTrue("'joe' in a[].name", mapOf("a" to arrayOf(mapOf("name" to "joe"))))
-        assertFalse("'bob' in a[].name", mapOf("a" to arrayOf(mapOf("name" to "joe"))))
+        assertFalse("'alice' in a[].name", mapOf("a" to arrayOf(mapOf("name" to "joe"))))
     }
-    
+
+    @Test
+    fun `expression to test if array contains nested value finds existing value`() {
+        assertTrue("'john' in a[].names[].first", mapOf("a" to listOf(mapOf("names" to listOf(mapOf("first" to "joe"),
+                mapOf("first" to "john"))))))
+        assertTrue("'jane' in a[].names[].first", mapOf("a" to listOf(mapOf("names" to listOf(mapOf("first" to "jane"),
+                mapOf("first" to "john"))))))
+        assertFalse("'bob' in a[].names[].first", mapOf("a" to listOf(mapOf("names" to listOf(mapOf("first" to "joe"),
+                mapOf("first" to "john"))))))
+    }
+
+
+    @Test
+    fun `expression to test if array contains deeply nested value finds existing value`() {
+        assertTrue("'joe' in a[].names[].first[].favorite", mapOf("a" to listOf(mapOf("names" to listOf(mapOf("first" to listOf(mapOf("favorite" to "joe"))),
+                mapOf("first" to listOf(mapOf("favorite" to "alice"))))))))
+    }
+
     fun assertTrue(code: String, symbolTable: Map<String, Any>) {
         assertTrue(interpreter.evaluate(code, symbolTable))
     }
