@@ -1,11 +1,11 @@
 package expresiones.lexer
 
 import expresiones.ExpresionesLexer
-import org.antlr.v4.runtime.ANTLRInputStream
+import org.antlr.v4.runtime.CharStreams
 import java.io.StringReader
 import java.util.*
 
-fun lexerForCode(code: String) = ExpresionesLexer(ANTLRInputStream(StringReader(code)))
+fun lexerForCode(code: String) = ExpresionesLexer(CharStreams.fromReader(StringReader(code)))
 
 fun tokensNames(lexer: ExpresionesLexer): List<String> {
     val tokens = LinkedList<String>()

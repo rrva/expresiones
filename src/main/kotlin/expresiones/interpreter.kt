@@ -233,7 +233,6 @@ class ExpresionesInterpreter {
 }
 
 
-
 fun main(args: Array<String>) {
     val code = """'bijäb'=="bijäb""""
     val expression = ExpresionesAntlrParserFacade.parse(code).root!!.toAst(considerPosition = true).expression

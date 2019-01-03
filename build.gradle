@@ -1,31 +1,33 @@
 buildscript {
-    ext.kotlin_version = '1.2.61'
-
+    ext {
+        kotlin_version = '1.3.11'
+    }
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.3.11'
+    id 'java-library'
+    id 'maven-publish'
+    id 'antlr'
 }
 
 group 'expresiones'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'kotlin'
-apply plugin: 'antlr'
+version '0.1.0'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile 'me.tomassetti:kolasu:0.1.2'
-    antlr "org.antlr:antlr4:4.5"
-    compile group: 'org.antlr', name: 'antlr4-runtime', version: '4.5'
-    testCompile 'junit:junit:4.12'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.11"
+    implementation 'me.tomassetti:kolasu:0.1.2'
+    antlr "org.antlr:antlr4:4.7.2"
+    api group: 'org.antlr', name: 'antlr4-runtime', version: '4.7.2'
+    testImplementation 'junit:junit:4.12'
 }
 
 generateGrammarSource {
@@ -42,4 +44,19 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                'Implementation-Version': project.version)
+    }
+}
+
+publishing {
+    publications {
+        expresiones(MavenPublication) {
+            from components.java
+        }
+    }
 }

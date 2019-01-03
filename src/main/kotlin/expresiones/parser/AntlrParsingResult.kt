@@ -42,7 +42,7 @@ object ExpresionesAntlrParserFacade {
             }
         }
 
-        val lexer = ExpresionesLexer(ANTLRInputStream(inputStream))
+        val lexer = ExpresionesLexer(CharStreams.fromStream(inputStream))
         lexer.removeErrorListeners()
         lexer.addErrorListener(errorListener)
         val parser = ExpresionesParser(CommonTokenStream(lexer))
